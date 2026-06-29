@@ -1,2 +1,4 @@
 .env
 .keras
+
+fruit_classifier.keras
