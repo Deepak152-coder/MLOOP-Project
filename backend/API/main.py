@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from model import predict_image
+from .model import predict_image
 
 app = FastAPI(
     title="Fruit Freshness Detection API",

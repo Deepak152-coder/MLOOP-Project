@@ -3,6 +3,14 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import pickle
+from pathlib import Path
+
+# ----------------------------
+# PATH SETUP
+# ----------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_PATH = BASE_DIR / "models" / "fruit_classifier.keras"
+CLASS_NAMES_PATH = BASE_DIR / "models" / "class_names.pkl"
 
 # ----------------------------
 # PAGE CONFIG
@@ -57,14 +65,14 @@ st.markdown("""
 # ----------------------------
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("models/fruit_classifier.keras")
+    return tf.keras.models.load_model(str(MODEL_PATH))
 
 model = load_model()
 
 # ----------------------------
 # LOAD CLASS NAMES
 # ----------------------------
-with open("models/class_names.pkl", "rb") as f:
+with open(CLASS_NAMES_PATH, "rb") as f:
     class_names = pickle.load(f)
 
 # ----------------------------
