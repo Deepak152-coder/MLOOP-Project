@@ -1,0 +1,44 @@
+# Virtual environment
+.venv/
+
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# MLflow artifacts
+mlruns/
+mlflow.db
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Documentation
+README.md
+
+# Kubernetes (not needed inside image)
+k8s/
+
+# Monitoring (not needed inside image)
+monitoring/
+
+# Training scripts (not needed for serving)
+MLFlow/
+
+# Ignore training dataset
+data/

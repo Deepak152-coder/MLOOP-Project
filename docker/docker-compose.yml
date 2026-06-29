@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+
+    container_name: fruit-backend
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      - MODEL_PATH=/app/models/latest_model.keras
+
+    volumes:
+      - ..:/app
+
+    restart: always
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+
+    container_name: fruit-frontend
+
+    depends_on:
+      - backend
+
+    ports:
+      - "8501:8501"
+
+    environment:
+      - API_URL=http://backend:8000
+
+    volumes:
+      - ..:/app
+
+    restart: always
+
+  mlflow:
+    image: python:3.11-slim
+
+    container_name: mlflow-server
+
+    working_dir: /app
+
+    command: >
+      bash -c "pip install mlflow &&
+      mlflow ui --host 0.0.0.0 --port 5001"
+
+    ports:
+      - "5001:5001"
+
+    volumes:
+      - ..:/app
+
+    restart: always
