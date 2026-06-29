@@ -7,7 +7,7 @@ from io import BytesIO
 from fastapi import UploadFile
 
 # Load Model
-model = tf.keras.models.load_model("models/fruit_classifier.keras")
+model = tf.keras.models.load_model("models/latest_model.keras")
 
 # Load Class Names
 with open("models/class_names.pkl", "rb") as f:

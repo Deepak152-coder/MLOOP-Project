@@ -2,3 +2,8 @@
 .keras
 
 fruit_classifier.keras
+
+.venv
+.venv*
+
+__pycache__

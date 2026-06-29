@@ -1,16 +1,12 @@
 import streamlit as st
-import tensorflow as tf
-import numpy as np
+import requests
 from PIL import Image
-import pickle
-from pathlib import Path
 
 # ----------------------------
-# PATH SETUP
+# API CONFIG
 # ----------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = BASE_DIR / "models" / "fruit_classifier.keras"
-CLASS_NAMES_PATH = BASE_DIR / "models" / "class_names.pkl"
+# Paste your FastAPI backend URL here.
+FASTAPI_BASE_URL = "http://127.0.0.1:8000/predict"
 
 # ----------------------------
 # PAGE CONFIG
@@ -59,21 +55,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-
-# ----------------------------
-# LOAD MODEL
-# ----------------------------
-@st.cache_resource
-def load_model():
-    return tf.keras.models.load_model(str(MODEL_PATH))
-
-model = load_model()
-
-# ----------------------------
-# LOAD CLASS NAMES
-# ----------------------------
-with open(CLASS_NAMES_PATH, "rb") as f:
-    class_names = pickle.load(f)
 
 # ----------------------------
 # HEADER
@@ -138,74 +119,76 @@ if uploaded_file is not None:
         )
 
     # ----------------------------
-    # PREPROCESSING
+    # CALL FASTAPI BACKEND
     # ----------------------------
-    img = image.resize((224, 224))
+    files = {
+        "file": (
+            uploaded_file.name,
+            uploaded_file.getvalue(),
+            uploaded_file.type,
+        )
+    }
 
-    img_array = np.array(img)
+    try:
+        response = requests.post(FASTAPI_BASE_URL, files=files)
+    except requests.exceptions.ConnectionError:
+        st.error("⚠️ Could not connect to the FastAPI backend. Make sure it's running.")
+        st.stop()
 
-    # Same preprocessing used during training
-    img_array = img_array / 255.0
+    if response.status_code == 200:
 
-    img_array = np.expand_dims(img_array, axis=0)
+        result = response.json()
 
-    # ----------------------------
-    # PREDICTION
-    # ----------------------------
-    prediction = model.predict(img_array, verbose=0)[0][0]
+        prediction = result["prediction"]      # "Fresh" or "Rotten"
+        confidence = result["confidence"]       # float, percentage
+        fresh_prob = result["fresh_probability"]    # float, percentage
+        rotten_prob = result["rotten_probability"]  # float, percentage
 
-    fresh_prob = (1 - prediction) * 100
-    rotten_prob = prediction * 100
+        with col2:
 
-    if prediction >= 0.5:
-        result = "🍂 Rotten"
-        confidence = rotten_prob
-    else:
-        result = "🍏 Fresh"
-        confidence = fresh_prob
+            st.subheader("🔍 Prediction Result")
 
-    with col2:
+            if prediction == "Rotten":
+                st.error("🍂 Rotten")
+            else:
+                st.success("🍏 Fresh")
 
-        st.subheader("🔍 Prediction Result")
+            st.metric(
+                label="Confidence",
+                value=f"{confidence:.2f}%"
+            )
 
-        if prediction >= 0.5:
-            st.error(result)
+        st.divider()
+
+        # ----------------------------
+        # PROBABILITY SECTION
+        # ----------------------------
+        st.subheader("📈 Prediction Probabilities")
+
+        st.write(f"🍏 Fresh : {fresh_prob:.2f}%")
+        st.progress(float(fresh_prob / 100))
+
+        st.write(f"🍂 Rotten : {rotten_prob:.2f}%")
+        st.progress(float(rotten_prob / 100))
+
+        st.divider()
+
+        # ----------------------------
+        # FINAL VERDICT
+        # ----------------------------
+        st.subheader("🏆 Final Verdict")
+
+        if prediction == "Rotten":
+            st.error(
+                f"⚠️ The fruit appears to be ROTTEN with {rotten_prob:.2f}% confidence."
+            )
         else:
-            st.success(result)
+            st.success(
+                f"✅ The fruit appears to be FRESH with {fresh_prob:.2f}% confidence."
+            )
 
-        st.metric(
-            label="Confidence",
-            value=f"{confidence:.2f}%"
-        )
-
-    st.divider()
-
-    # ----------------------------
-    # PROBABILITY SECTION
-    # ----------------------------
-    st.subheader("📈 Prediction Probabilities")
-
-    st.write(f"🍏 Fresh : {fresh_prob:.2f}%")
-    st.progress(float(fresh_prob / 100))
-
-    st.write(f"🍂 Rotten : {rotten_prob:.2f}%")
-    st.progress(float(rotten_prob / 100))
-
-    st.divider()
-
-    # ----------------------------
-    # FINAL VERDICT
-    # ----------------------------
-    st.subheader("🏆 Final Verdict")
-
-    if prediction >= 0.5:
-        st.error(
-            f"⚠️ The fruit appears to be ROTTEN with {rotten_prob:.2f}% confidence."
-        )
     else:
-        st.success(
-            f"✅ The fruit appears to be FRESH with {fresh_prob:.2f}% confidence."
-        )
+        st.error("Failed to get prediction from FastAPI backend.")
 
 # ----------------------------
 # FOOTER

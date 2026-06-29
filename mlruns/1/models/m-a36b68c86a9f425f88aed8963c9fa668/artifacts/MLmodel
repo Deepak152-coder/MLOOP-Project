@@ -1,0 +1,22 @@
+artifact_path: file:///C:/Users/Deepak Kumar/OneDrive/Desktop/MLOOPS Project/mlruns/1/models/m-a36b68c86a9f425f88aed8963c9fa668/artifacts
+flavors:
+  python_function:
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.tensorflow
+    python_version: 3.11.9
+  tensorflow:
+    code: null
+    data: data
+    keras_version: 2.21.0
+    model_type: keras
+    save_format: tf
+mlflow_version: 3.14.0
+model_id: m-a36b68c86a9f425f88aed8963c9fa668
+model_size_bytes: 9642299
+model_uuid: m-a36b68c86a9f425f88aed8963c9fa668
+prompts: null
+run_id: 746dda098db549c0954d555d14b53ca3
+utc_time_created: '2026-06-29 18:40:06.427651'
