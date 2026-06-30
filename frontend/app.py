@@ -6,7 +6,7 @@ from PIL import Image
 # API CONFIG
 # ----------------------------
 # Paste your FastAPI backend URL here.
-FASTAPI_BASE_URL = "http://127.0.0.1:8000/predict"
+FASTAPI_BASE_URL = "http://16.16.212.78:8000/predict"
 
 # ----------------------------
 # PAGE CONFIG
